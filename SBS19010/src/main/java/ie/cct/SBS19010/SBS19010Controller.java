@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,7 +69,7 @@ public class SBS19010Controller {
 	// using requestparam because the url by default doesnt need a parameter but we
 	// will make it so
 	@GetMapping("farm-value")
-	public double totalValueOfAnimals(@RequestParam(required = true) String animalType) {
+	public ResponseEntity<double> totalValueOfAnimals(@RequestParam(required = true) String animalType) {
 		// this currently only returns the total price of one kind of animal,need to be
 		// all animals
 		double valueOfAnimals = 0;
@@ -78,9 +79,11 @@ public class SBS19010Controller {
 			}
 		}
 		if(valueOfAnimals == 0) {
-			throw new RuntimeException ("There is no " + animalType + "/s on the farm");
+			
+			throw new RuntimeException ("Item not found");
 		}
-		return valueOfAnimals;
+	
+		return new ResponseEntity<double>(valueOfAnimals, HttpStatus.OK);
 	}
 
 }
