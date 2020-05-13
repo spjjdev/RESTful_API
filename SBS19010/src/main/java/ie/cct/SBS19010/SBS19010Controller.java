@@ -31,29 +31,43 @@ public class SBS19010Controller {
 		return "hello";
 	}
 
-	// this annotation is for receiving data from the client, creating an instance
+	// this annotation POST is for receiving data from the client, creating an instance
 	// of an animal
 	// the RequestBody annotation means that we will receive info from the body and
 	// not the URL
+	//eg { "name":"test"
+//	       "weight" : "32"
 	@PostMapping("add-animal")
 	public List<Animal> addAnimal(@RequestBody Animal animal) {
 		animals.add(animal);
 		return animals;
 	}
 
+	// added request parameters here because the brief said Calculate the average
+	// weight of each type of animal and one endpoint is sufficient, making the
+	// request parameter necessary fulfills this
+	//Endpoint 2
 	@GetMapping("average-weight")
-	public double averageWeight() {
+	public String averageWeight(@RequestParam(required = true) String animalType) {
 		double avgWeight = 0;
+		
 		for (Animal animal : animals) {
+			if (animal.getType().contentEquals(animalType)) {
 			avgWeight += animal.getWeight();
-		}
+			}
+		}                           //number of animals of each type instead of total animals
 		avgWeight = avgWeight / animals.size();
-		// create an object to return JSON instead of double
-		return avgWeight;
+		// create an object to return JSON instead of double     TO DO!!!!!!!!!
+		
+		return "The average weight of the " + animalType + "/s is " + avgWeight + "kg";
+		//return success response
 	}
 
-	@GetMapping("sellable-animals")
-	public Map<String, Integer> getSellableAnimals() {
+	
+	//this counts each type of animal similar to 3 and 4
+	//Endpoint 3
+	@GetMapping("animal-type-quantity")
+	public Map<String, Integer> getAnimalTypeQuantity() {
 		Map<String, Integer> summary = new HashMap<String, Integer>();
 		for (Animal animal : animals) {
 			if (summary.get(animal.getType()) == null) {
@@ -65,25 +79,40 @@ public class SBS19010Controller {
 		}
 		return summary;
 	}
+	
+	
+	//Endpoint 4
+	@GetMapping ("farm-value")
+	public double totalValueOfAnimals () {
+		double valueOfAnimals = 0;
+		for (Animal animal: animals) {
+			valueOfAnimals += animal.getPrice();
+		}
+		return valueOfAnimals;
+	}
 
 	// using requestparam because the url by default doesnt need a parameter but we
 	// will make it so
-	@GetMapping("farm-value")
-	public ResponseEntity<double> totalValueOfAnimals(@RequestParam(required = true) String animalType) {
+	//8080/farm-value
+	//filters to animal of certain type
+	//Endpoint 5
+	@GetMapping("user-value")
+	public double valueOfAnimalType(@RequestParam(required = true) String animalType) {
 		// this currently only returns the total price of one kind of animal,need to be
 		// all animals
-		double valueOfAnimals = 0;
+		double valueOfAnimalType = 0;
 		for (Animal animal : animals) {
 			if (animal.getType().contentEquals(animalType)) {
-				valueOfAnimals += animal.getPrice();
+				valueOfAnimalType += animal.getPrice();
 			}
 		}
-		if(valueOfAnimals == 0) {
-			
-			throw new RuntimeException ("Item not found");
+		if (valueOfAnimalType == 0) {
+
+			throw new RuntimeException("Item not found");
 		}
-	
-		return new ResponseEntity<double>(valueOfAnimals, HttpStatus.OK);
+
+		return valueOfAnimalType;
 	}
+	
 
 }
