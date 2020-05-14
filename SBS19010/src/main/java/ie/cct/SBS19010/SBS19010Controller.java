@@ -48,8 +48,8 @@ public class SBS19010Controller {
 	// request parameter necessary fulfills this
 	//Endpoint 2
 	@GetMapping("average-weight")
-	public String averageWeight(@RequestParam(required = true) String animalType) {
-		double avgWeight = 0;
+	public AverageWeightResponse averageWeight(@RequestParam(required = true) String animalType) {
+		float avgWeight = 0;
 		
 		for (Animal animal : animals) {
 			if (animal.getType().contentEquals(animalType)) {
@@ -59,7 +59,8 @@ public class SBS19010Controller {
 		avgWeight = avgWeight / animals.size();
 		// create an object to return JSON instead of double     TO DO!!!!!!!!!
 		
-		return "The average weight of the " + animalType + "/s is " + avgWeight + "kg";
+		return new AverageWeightResponse(animalType, avgWeight);
+//				"The average weight of the " + animalType + "/s is " + avgWeight + "kg";
 		//return success response
 	}
 
