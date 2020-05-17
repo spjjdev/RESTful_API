@@ -19,101 +19,122 @@ public class SBS19010Controller {
 	private List<Animal> animals;
 
 	public SBS19010Controller() {
+
 		animals = new ArrayList<Animal>();
-		animals.add(new Animal("Cow", 300, 500));
-		animals.add(new Animal("Pig", 100, 250));
-		animals.add(new Animal("Chicken", 0.5, 5));
+		animals.add(new Animal("Cow", 300));
+		animals.add(new Animal("Pig", 100));
+		animals.add(new Animal("Chicken", 0.5));
+		animals.add(new Animal("Cow", 300));
+		animals.add(new Animal("Pig", 100));
+		animals.add(new Animal("Chicken", 0.5));
 	}
 
-	// this annotation connects the method to the HTTP resource
-	@GetMapping("hello-world")
-	public String hello() {
-		return "hello";
-	}
-
-	// this annotation POST is for receiving data from the client, creating an instance
-	// of an animal
-	// the RequestBody annotation means that we will receive info from the body and
-	// not the URL
-	//eg { "name":"test"
-//	       "weight" : "32"
+	// Endpoint 1: This adds an Animal object to the ArrayList 'animals', can be
+	// tested by using Postman, posting a body of type JSON eg. {"type": "Cow",
+	// "weight": 300.0} using the URL http://localhost:8080/add-animal
 	@PostMapping("add-animal")
 	public List<Animal> addAnimal(@RequestBody Animal animal) {
 		animals.add(animal);
 		return animals;
 	}
 
-	// added request parameters here because the brief said Calculate the average
-	// weight of each type of animal and one endpoint is sufficient, making the
-	// request parameter necessary fulfills this
-	//Endpoint 2
+	// Endpoint 2: This calculates the average weight of each type of animal when
+	// the animal is specified in the URL eg.
+	// http://localhost:8080/average-weight?animalType=Cow
 	@GetMapping("average-weight")
 	public AverageWeightResponse averageWeight(@RequestParam(required = true) String animalType) {
-		float avgWeight = 0;
-		
+		double avgWeight = 0;
+		ArrayList<Animal> type = new ArrayList<Animal>();
 		for (Animal animal : animals) {
 			if (animal.getType().contentEquals(animalType)) {
-			avgWeight += animal.getWeight();
-			}
-		}                           //number of animals of each type instead of total animals
-		avgWeight = avgWeight / animals.size();
-		// create an object to return JSON instead of double     TO DO!!!!!!!!!
-		
-		return new AverageWeightResponse(animalType, avgWeight);
-//				"The average weight of the " + animalType + "/s is " + avgWeight + "kg";
-		//return success response
-	}
-
-	
-	//this counts each type of animal similar to 3 and 4
-	//Endpoint 3
-	@GetMapping("animal-type-quantity")
-	public Map<String, Integer> getAnimalTypeQuantity() {
-		Map<String, Integer> summary = new HashMap<String, Integer>();
-		for (Animal animal : animals) {
-			if (summary.get(animal.getType()) == null) {
-				summary.put(animal.getType(), 1);
-			} else {
-				Integer count = summary.get(animal.getType());
-				summary.put(animal.getType(), ++count);
+				type.add(animal);
+				avgWeight += animal.getWeight();
 			}
 		}
-		return summary;
+		avgWeight = avgWeight / type.size();
+		return new AverageWeightResponse(animalType, avgWeight);
 	}
-	
-	
-	//Endpoint 4
-	@GetMapping ("farm-value")
-	public double totalValueOfAnimals () {
+
+	// Endpoint 3: This returns the quantity of each type of animal in the farm
+	// using the URL http://localhost:8080/animal-type-quantity
+	@GetMapping("animal-type-quantity")
+	public Map<String, Integer> getAnimalTypeQuantity() {
+		Map<String, Integer> quantity = new HashMap<String, Integer>();
+		for (Animal animal : animals) {
+			if (quantity.get(animal.getType()) == null) {
+				quantity.put(animal.getType(), 1);
+			} else {
+				Integer count = quantity.get(animal.getType());
+				switch (animal.getType()) {
+				case "Cow":
+					if (animal.getWeight() >= 300) {
+						quantity.put(animal.getType(), ++count);
+					}
+					break;
+				case "Pig":
+					if (animal.getWeight() >= 100) {
+						quantity.put(animal.getType(), ++count);
+					}
+					break;
+				case "Chicken":
+					if (animal.getWeight() >= 0.5) {
+						quantity.put(animal.getType(), ++count);
+					}
+					break;
+				}
+				
+//				quantity.put(animal.getType(), ++count);
+			}
+		}
+		return quantity;
+	}
+
+	// Endpoint 4: This calculates the total value of the farm with the
+	// market value of each animal using the URL http://localhost:8080/farm-value
+	@GetMapping("farm-value")
+	public double totalValueOfAnimals() {
+		double valueCow = 500;
+		double valuePig = 250;
+		double valueChicken = 5;
 		double valueOfAnimals = 0;
-		for (Animal animal: animals) {
-			valueOfAnimals += animal.getPrice();
+		for (Animal animal : animals) {
+			if (animal.getType().contains("Cow"))
+				valueOfAnimals += valueCow;
+			if (animal.getType().contains("Pig"))
+				valueOfAnimals += valuePig;
+			if (animal.getType().contains("Chicken"))
+				valueOfAnimals += valueChicken;
 		}
 		return valueOfAnimals;
 	}
 
-	// using requestparam because the url by default doesnt need a parameter but we
-	// will make it so
-	//8080/farm-value
-	//filters to animal of certain type
-	//Endpoint 5
+	// Endpoint 5: This calculates the value of the farm with a user determined
+	// value of each animal using the URL
+	// http://localhost:8080/user-value?cowValue=1&pigValue=1&chickenValue=1
 	@GetMapping("user-value")
-	public double valueOfAnimalType(@RequestParam(required = true) String animalType) {
-		// this currently only returns the total price of one kind of animal,need to be
-		// all animals
-		double valueOfAnimalType = 0;
+	public Price userValueOfAnimals(@RequestParam(required = true) Double cowValue,
+			@RequestParam(required = true) Double pigValue, @RequestParam(required = true) Double chickenValue) {
+		double farmValue = 0;
 		for (Animal animal : animals) {
-			if (animal.getType().contentEquals(animalType)) {
-				valueOfAnimalType += animal.getPrice();
+			switch (animal.getType()) {
+			case "Cow":
+				if (animal.getWeight() >= 300) {
+					farmValue += cowValue;
+				}
+				break;
+			case "Pig":
+				if (animal.getWeight() >= 100) {
+					farmValue += pigValue;
+				}
+				break;
+			case "Chicken":
+				if (animal.getWeight() >= 0.5) {
+					farmValue += chickenValue;
+				}
+				break;
 			}
 		}
-		if (valueOfAnimalType == 0) {
-
-			throw new RuntimeException("Item not found");
-		}
-
-		return valueOfAnimalType;
+		return new Price(farmValue);
 	}
-	
 
 }
