@@ -55,7 +55,8 @@ public class SBS19010Controller {
 		return new AverageWeightResponse(animalType, avgWeight);
 	}
 
-	// Endpoint 3: This returns the quantity of each type of animal in the farm
+	// Endpoint 3: This returns the quantity of each type of animal in the farm only
+	// if the weight is equal to or above market value so they can be sold,
 	// using the URL http://localhost:8080/animal-type-quantity
 	@GetMapping("animal-type-quantity")
 	public Map<String, Integer> getAnimalTypeQuantity() {
@@ -82,7 +83,7 @@ public class SBS19010Controller {
 					}
 					break;
 				}
-				
+
 //				quantity.put(animal.getType(), ++count);
 			}
 		}
